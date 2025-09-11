@@ -145,26 +145,14 @@ class Encounter(DomainResource):
     # The organization that is primarily responsible for this Encounter (0..1 Reference)
     serviceProvider = models.ForeignKey('components.Reference', null=True, blank=True, on_delete=models.SET_NULL, related_name='provided_encounters')
     
-    # The start and end time of the encounter (0..1 Period)
-    period = models.ForeignKey('components.Period', null=True, blank=True, on_delete=models.SET_NULL, related_name='encounters')
+    # List of participants involved in the encounter (BackboneElement - handled via reverse FK)
+    # Note: EncounterParticipant handles this
     
-    # Quantity of time the encounter lasted (0..1 Duration)
-    length = models.ForeignKey('components.Duration', null=True, blank=True, on_delete=models.SET_NULL, related_name='encounters')
+    # The appointment that scheduled this encounter (0..* Reference)
+    appointment = models.ManyToManyField('components.Reference', blank=True, related_name='encounters_appointment')
     
-    # Additional comments about the encounter (0..1 markdown)
-    note = models.TextField(null=True, blank=True)
-    
-    # The set of accounts that may be used for billing for this Encounter (0..* Reference)
-    account = models.ManyToManyField('components.Reference', blank=True, related_name='encounters_account')
-    
-    # Diet preferences reported by the patient (0..* CodeableConcept)
-    dietPreference = models.ManyToManyField('components.CodeableConcept', blank=True, related_name='encounter_diet_preferences')
-    
-    # Special courtesies (VIP, board member) (0..* CodeableConcept)
-    specialCourtesy = models.ManyToManyField('components.CodeableConcept', blank=True, related_name='encounter_special_courtesies')
-    
-    # Wheelchair, translator, stretcher, etc. (0..* CodeableConcept)
-    specialArrangement = models.ManyToManyField('components.CodeableConcept', blank=True, related_name='encounter_special_arrangements')
+    # The actual start date/time of the encounter (0..1 dateTime) 
+    actualPeriod = models.ForeignKey('components.Period', null=True, blank=True, on_delete=models.SET_NULL, related_name='actual_encounters')
     
     # Another Encounter of which this encounter is a revision of (0..* Reference)
     plannedStartDate = models.DateTimeField(null=True, blank=True)
@@ -172,23 +160,38 @@ class Encounter(DomainResource):
     # The planned end date/time (or discharge date) of the encounter (0..1 dateTime)
     plannedEndDate = models.DateTimeField(null=True, blank=True)
     
-    # The actual start date/time of the encounter (0..1 dateTime) 
-    actualPeriod = models.ForeignKey('components.Period', null=True, blank=True, on_delete=models.SET_NULL, related_name='actual_encounters')
+    # Quantity of time the encounter lasted (0..1 Duration)
+    length = models.ForeignKey('components.Duration', null=True, blank=True, on_delete=models.SET_NULL, related_name='encounters')
+    
+	# The list of reason relevant to this encounter (BackboneElement - handled via reverse FK)
+    # Note: EncounterReason handles this
+    
+    # The list of diagnosis relevant to this encounter (BackboneElement - handled via reverse FK)
+    # Note: EncounterDiagnosis handles this
+    
+    # The set of accounts that may be used for billing for this Encounter (0..* Reference)
+    account = models.ManyToManyField('components.Reference', blank=True, related_name='encounters_account')
+    
+    # Diet preferences reported by the patient (0..* CodeableConcept)
+    dietPreference = models.ManyToManyField('components.CodeableConcept', blank=True, related_name='encounter_diet_preferences')
+    
+    # Wheelchair, translator, stretcher, etc. (0..* CodeableConcept)
+    specialArrangement = models.ManyToManyField('components.CodeableConcept', blank=True, related_name='encounter_special_arrangements')
+    
+    # Special courtesies (VIP, board member) (0..* CodeableConcept)
+    specialCourtesy = models.ManyToManyField('components.CodeableConcept', blank=True, related_name='encounter_special_courtesies')
+    
+    # The start and end time of the encounter (0..1 Period)
+    period = models.ForeignKey('components.Period', null=True, blank=True, on_delete=models.SET_NULL, related_name='encounters')
+    
+    # Additional comments about the encounter (0..1 markdown)
+    note = models.TextField(null=True, blank=True)
     
     # Discharge details including disposition (BackboneElement - handled via reverse FK)
     # Note: EncounterAdmission handles admission and discharge details
     
-    # List of participants involved in the encounter (BackboneElement - handled via reverse FK)
-    # Note: EncounterParticipant handles this
-    
-    # The appointment that scheduled this encounter (0..* Reference)
-    appointment = models.ManyToManyField('components.Reference', blank=True, related_name='encounters_appointment')
-    
     # List of locations where the patient has been during this encounter (BackboneElement - handled via reverse FK)
     # Note: EncounterLocation handles this
-    
-    # The list of diagnosis relevant to this encounter (BackboneElement - handled via reverse FK)
-    # Note: EncounterDiagnosis handles this
     
     class Meta:
         db_table = 'encounter'
