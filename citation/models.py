@@ -160,17 +160,6 @@ class CitedArtifactPublicationFormPublishedIn(BackboneElement):
         db_table = 'cited_artifact_publication_form_published_in'
 
 
-class CitedArtifactPublicationFormPublishedInIdentifier(models.Model):
-    """Journal identifiers include ISSN, ISO Abbreviation and NLMuniqueID; Book identifiers include ISBN"""
-    # Published in this identifier belongs to
-    published_in = models.ForeignKey('CitedArtifactPublicationFormPublishedIn', on_delete=models.CASCADE, related_name='identifiers')
-    # The identifier (1..1 Identifier)
-    identifier = models.ForeignKey('components.Identifier', on_delete=models.CASCADE, related_name='published_in_identifiers')
-    
-    class Meta:
-        db_table = 'cited_artifact_publication_form_published_in_identifier'
-
-
 class CitedArtifactPublicationForm(BackboneElement):
     """Alternative forms of the article that are not separate citations"""
     # Cited artifact this publication form belongs to

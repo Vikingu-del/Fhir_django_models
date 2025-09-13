@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from abstractClasses.models import *
 import bleach
 
+
 # Create your models here.
 
 ### Complex data types ###
@@ -48,6 +49,8 @@ class Identifier(Element):
     cited_artifact = models.ForeignKey('citation.CitedArtifact', null=True, blank=True, on_delete=models.CASCADE, related_name='identifiers')
     # CitedArtifact related identifier (optional)
     cited_artifact_related = models.ForeignKey('citation.CitedArtifact', null=True, blank=True, on_delete=models.CASCADE, related_name='related_identifiers')
+    # CitedArtifactPublicationFormPublishedIn this identifier belongs to (optional)
+    published_in = models.ForeignKey('citation.CitedArtifactPublicationFormPublishedIn', null=True, blank=True, on_delete=models.CASCADE, related_name='identifiers')
     
     class Meta:
         db_table = 'identifier'
