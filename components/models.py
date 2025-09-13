@@ -51,6 +51,8 @@ class Identifier(Element):
     cited_artifact_related = models.ForeignKey('citation.CitedArtifact', null=True, blank=True, on_delete=models.CASCADE, related_name='related_identifiers')
     # CitedArtifactPublicationFormPublishedIn this identifier belongs to (optional)
     published_in = models.ForeignKey('citation.CitedArtifactPublicationFormPublishedIn', null=True, blank=True, on_delete=models.CASCADE, related_name='identifiers')
+    # Encounter this identifier belongs to (optional)
+    encounter = models.ForeignKey('encounter.Encounter', null=True, blank=True, on_delete=models.CASCADE, related_name='identifiers')
     
     class Meta:
         db_table = 'identifier'
@@ -145,6 +147,8 @@ class ContactPoint(Element):
     related_person = models.ForeignKey('patient.RelatedPerson', null=True, blank=True, on_delete=models.CASCADE, related_name='telecom_points')
     # Patient contact this contact point belongs to (optional)
     patient_contact = models.ForeignKey('patient.PatientContact', null=True, blank=True, on_delete=models.CASCADE, related_name='telecom_points')
+    # Encounter this contact point belongs to (optional)
+    encounter = models.ForeignKey('encounter.Encounter', null=True, blank=True, on_delete=models.CASCADE, related_name='telecom_points')
     
     class Meta:
         db_table = 'contact_point'
@@ -178,6 +182,8 @@ class ContactDetail(Element):
     citation_reviewer = models.ForeignKey('citation.Citation', null=True, blank=True, on_delete=models.CASCADE, related_name='reviewers')
     # Citation endorser (optional)
     citation_endorser = models.ForeignKey('citation.Citation', null=True, blank=True, on_delete=models.CASCADE, related_name='endorsers')
+    # Encounter this contact detail belongs to (optional)
+    encounter = models.ForeignKey('encounter.Encounter', null=True, blank=True, on_delete=models.CASCADE, related_name='contacts')
     
     class Meta:
         db_table = 'contact_detail'
@@ -197,6 +203,8 @@ class ExtendedContactDetail(Element):
     organization_contact = models.ForeignKey('organization.Organization', null=True, blank=True, on_delete=models.CASCADE, related_name='extended_contact_details')
     # Healthcare service this extended contact belongs to (optional)
     healthcare_service_contact = models.ForeignKey('healthcareservice.HealthcareService', null=True, blank=True, on_delete=models.CASCADE, related_name='extended_contact_details')
+    # Encounter this extended contact belongs to (optional)
+    encounter = models.ForeignKey('encounter.Encounter', null=True, blank=True, on_delete=models.CASCADE, related_name='extended_contact_details')
     
     class Meta:
         db_table = 'extended_contact_detail'
@@ -229,6 +237,8 @@ class HumanName(Element):
     patient = models.ForeignKey('patient.Patient', null=True, blank=True, on_delete=models.CASCADE, related_name='names')
     # RelatedPerson this name belongs to (optional)
     related_person = models.ForeignKey('patient.RelatedPerson', null=True, blank=True, on_delete=models.CASCADE, related_name='names')
+    # Encounter this name belongs to (optional)
+    encounter = models.ForeignKey('encounter.Encounter', null=True, blank=True, on_delete=models.CASCADE, related_name='names')
     
     class Meta:
         db_table = 'human_name'
@@ -315,6 +325,8 @@ class Address(Element):
     patient = models.ForeignKey('patient.Patient', null=True, blank=True, on_delete=models.CASCADE, related_name='addresses')
     # RelatedPerson this address belongs to (optional)
     related_person = models.ForeignKey('patient.RelatedPerson', null=True, blank=True, on_delete=models.CASCADE, related_name='addresses')
+    # Encounter this address belongs to (optional)
+    encounter = models.ForeignKey('encounter.Encounter', null=True, blank=True, on_delete=models.CASCADE, related_name='addresses')
     
     class Meta:
         db_table = 'address'
@@ -472,8 +484,8 @@ class Narrative(Element):
         # Rule 2: Limited XHTML content
         cleaned = bleach.clean(
             self.div, 
-            tags=ALLOWED_TAGS,
-            attributes=ALLOWED_ATTRIBUTES,
+            tags=self.ALLOWED_TAGS,
+            attributes=self.ALLOWED_ATTRIBUTES,
             strip=True
         )
 
@@ -695,6 +707,8 @@ class Attachment(DataType):
     patient = models.ForeignKey('patient.Patient', null=True, blank=True, on_delete=models.CASCADE, related_name='photos')
     # RelatedPerson this attachment belongs to (optional)
     related_person = models.ForeignKey('patient.RelatedPerson', null=True, blank=True, on_delete=models.CASCADE, related_name='photos')
+    # Encounter this attachment belongs to (optional)
+    encounter = models.ForeignKey('encounter.Encounter', null=True, blank=True, on_delete=models.CASCADE, related_name='attachments')
     
     def clean(self):
         super().clean()
@@ -771,3 +785,20 @@ class Reference(Element):
         return "Reference(empty)"
 
 # -----------------------------------------REFERENCE---------------------------------------- #
+
+
+# -----------------------------------------DURATION---------------------------------------- #
+
+class Duration(Quantity):
+    """A length of time"""
+    
+    class Meta:
+        db_table = 'duration'
+    
+    def clean(self):
+        super().clean()
+        # Duration SHALL be a non-negative value
+        if self.value is not None and self.value < 0:
+            raise ValidationError("Duration value must be non-negative")
+
+# -----------------------------------------DURATION---------------------------------------- #
