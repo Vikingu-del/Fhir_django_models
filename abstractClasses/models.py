@@ -274,7 +274,8 @@ class MetadataResource(CanonicalResource):
     endorser = models.ManyToManyField('components.ContactDetail', blank=True, related_name='endorsed_metadata_resources')
     
     # Additional documentation, citations, etc (0..* RelatedArtifact)
-    relatedArtifact = models.ManyToManyField('components.RelatedArtifact', blank=True, related_name='metadata_resources')
+    # TODO: Uncomment when RelatedArtifact model is created
+    # relatedArtifact = models.ManyToManyField('components.RelatedArtifact', blank=True, related_name='metadata_resources')
     
     class Meta:
         abstract = True

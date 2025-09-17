@@ -52,7 +52,6 @@ INSTALLED_APPS = [
     "encounter",
     "observation",
     "core",
-    "authentication",
     "citation",
 ]
 

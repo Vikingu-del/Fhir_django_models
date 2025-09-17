@@ -3,6 +3,9 @@ from django.core.exceptions import ValidationError
 from abstractClasses.models import *
 import bleach
 
+# Import Reference from separate file to avoid conflicts
+from .reference import Reference
+
 
 # Create your models here.
 
@@ -750,39 +753,7 @@ class VirtualServiceDetail(Element):
 
 # -----------------------------------------VIRTUAL SERVICE DETAIL---------------------------------------- #
 
-
-class Reference(Element):
-    """A reference from one resource to another"""
-    # Literal reference, Relative, internal or absolute URL (0..1 string)
-    reference = models.CharField(max_length=512, null=True, blank=True)
-    # Type the reference refers to (0..1 uri)
-    type = models.CharField(max_length=64, null=True, blank=True)
-    # Logical reference, when literal reference is not known (0..1 Identifier)
-    identifier = models.ForeignKey('Identifier', null=True, blank=True, on_delete=models.SET_NULL, related_name='references')
-    # Text alternative for the resource (0..1 string)
-    display = models.CharField(max_length=256, null=True, blank=True)
-    
-    class Meta:
-        db_table = 'reference'
-        indexes = [
-            models.Index(fields=['reference']),
-            models.Index(fields=['type']),
-        ]
-    
-    def clean(self):
-        super().clean()
-        # FHIR Rule: At least one of reference, identifier and display SHALL be present
-        if not (self.reference or self.identifier or self.display):
-            raise ValidationError("Reference must have at least one of reference, identifier, or display")
-    
-    def __str__(self):
-        if self.reference:
-            return f"Reference({self.reference})"
-        elif self.identifier:
-            return f"Reference(identifier={self.identifier})"
-        elif self.display:
-            return f"Reference(display={self.display})"
-        return "Reference(empty)"
+# Reference model is defined in components/reference.py to avoid conflicts
 
 # -----------------------------------------REFERENCE---------------------------------------- #
 
@@ -802,3 +773,38 @@ class Duration(Quantity):
             raise ValidationError("Duration value must be non-negative")
 
 # -----------------------------------------DURATION---------------------------------------- #
+
+class RelatedArtifact(Element):
+    """Related artifacts for a knowledge resource"""
+    # documentation | justification | citation | predecessor | successor | derived-from | depends-on | composed-of (1..1 code)
+    type = models.CharField(max_length=20, choices=[
+        ('documentation', 'Documentation'),
+        ('justification', 'Justification'),
+        ('citation', 'Citation'),
+        ('predecessor', 'Predecessor'),
+        ('successor', 'Successor'),
+        ('derived-from', 'Derived From'),
+        ('depends-on', 'Depends On'),
+        ('composed-of', 'Composed Of'),
+    ])
+    # Short label (0..1 string)
+    label = models.CharField(max_length=255, null=True, blank=True)
+    # Brief description of the related artifact (0..1 string)
+    display = models.CharField(max_length=500, null=True, blank=True)
+    # Bibliographic citation for the artifact (0..1 markdown)
+    citation = models.TextField(null=True, blank=True)
+    # What document is being referenced (0..1 url)
+    url = models.URLField(null=True, blank=True)
+    # What document is being referenced (0..1 Attachment)
+    document = models.ForeignKey('Attachment', null=True, blank=True, on_delete=models.SET_NULL, related_name='related_artifacts')
+    # What resource is being referenced (0..1 Reference)
+    resource = models.ForeignKey(Reference, null=True, blank=True, on_delete=models.SET_NULL, related_name='related_artifacts')
+    
+    class Meta:
+        db_table = 'related_artifact'
+        indexes = [
+            models.Index(fields=['type']),
+        ]
+    
+    def __str__(self):
+        return f"RelatedArtifact({self.type}, {self.label or self.display or 'no label'})"

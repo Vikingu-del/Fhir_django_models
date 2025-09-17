@@ -57,11 +57,11 @@ class EncounterAdmission(BackboneElement):
     # The type of hospital re-admission that has occurred (0..1 CodeableConcept)
     reAdmission = models.ForeignKey('components.CodeableConcept', null=True, blank=True, on_delete=models.SET_NULL, related_name='encounter_readmissions')
     # Diet preferences reported by the patient (0..* CodeableConcept)
-    dietPreference = models.ManyToManyField('components.CodeableConcept', blank=True, related_name='encounter_diet_preferences')
+    dietPreference = models.ManyToManyField('components.CodeableConcept', blank=True, related_name='encounter_admission_diet_preferences')
     # Special courtesies (0..* CodeableConcept)
-    specialCourtesy = models.ManyToManyField('components.CodeableConcept', blank=True, related_name='encounter_special_courtesies')
+    specialCourtesy = models.ManyToManyField('components.CodeableConcept', blank=True, related_name='encounter_admission_special_courtesies')
     # Wheelchair, translator, stretcher, etc. (0..* CodeableConcept)
-    specialArrangement = models.ManyToManyField('components.CodeableConcept', blank=True, related_name='encounter_special_arrangements')
+    specialArrangement = models.ManyToManyField('components.CodeableConcept', blank=True, related_name='encounter_admission_special_arrangements')
     # Location/organization to which the patient is discharged (0..1 Reference)
     destination = models.ForeignKey('components.Reference', null=True, blank=True, on_delete=models.SET_NULL, related_name='encounter_admission_destinations')
     # Category or kind of location after discharge (0..1 CodeableConcept)
@@ -173,13 +173,13 @@ class Encounter(DomainResource):
     account = models.ManyToManyField('components.Reference', blank=True, related_name='encounters_account')
     
     # Diet preferences reported by the patient (0..* CodeableConcept)
-    dietPreference = models.ManyToManyField('components.CodeableConcept', blank=True, related_name='encounter_diet_preferences')
+    dietPreference = models.ManyToManyField('components.CodeableConcept', blank=True, related_name='encounter_main_diet_preferences')
     
     # Wheelchair, translator, stretcher, etc. (0..* CodeableConcept)
-    specialArrangement = models.ManyToManyField('components.CodeableConcept', blank=True, related_name='encounter_special_arrangements')
+    specialArrangement = models.ManyToManyField('components.CodeableConcept', blank=True, related_name='encounter_main_special_arrangements')
     
     # Special courtesies (VIP, board member) (0..* CodeableConcept)
-    specialCourtesy = models.ManyToManyField('components.CodeableConcept', blank=True, related_name='encounter_special_courtesies')
+    specialCourtesy = models.ManyToManyField('components.CodeableConcept', blank=True, related_name='encounter_main_special_courtesies')
     
     # The start and end time of the encounter (0..1 Period)
     period = models.ForeignKey('components.Period', null=True, blank=True, on_delete=models.SET_NULL, related_name='encounters')
